@@ -1,0 +1,167 @@
+import { useEffect, useState, useCallback } from "react";
+import { MapContainer, TileLayer, Polyline, Marker, Popup, ZoomControl } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import "./RoutingMap.css"
+import { decodePolyline } from "../../utils/decodePolyline";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
+  iconUrl: require("leaflet/dist/images/marker-icon.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+});
+
+export default function RouteMap() {
+  const [routeData, setRouteData] = useState(null);
+  const [error] = useState(null);
+  const [transportMode, setTransportMode] = useState("auto");
+  const [avoidTolls, setAvoidTolls] = useState(false);
+
+  const fetchRoute = useCallback(async () => {
+    const url = "http://localhost:8081/route";
+    const body = {
+      locations: [
+        { lat: 45.7489, lon: 4.8263 },
+        { lat: 45.768, lon: 4.836 },
+      ],
+      costing: transportMode,
+      costing_options: {
+        [transportMode]: {
+          use_tolls: avoidTolls ? 0 : 1
+        }
+      },
+      directions_options: {
+        language: "fr-FR",
+        units: "kilometers"
+      }
+    };
+  
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+  
+      if (!res.ok) throw new Error("Erreur lors de la récupération de l'itinéraire");
+  
+      const data = await res.json();
+      setRouteData(data);
+    } catch (err) {
+      console.error("Erreur fetchRoute:", err);
+      alert("Erreur lors de l'appel à l'API Valhalla.");
+    }
+  }, [transportMode, avoidTolls]);
+  
+  
+  useEffect(() => {
+    fetchRoute();
+  }, [fetchRoute]);  
+  
+
+  if (error) return <div>Error: {error}</div>;
+  if (!routeData) return <div>Loading...</div>;
+
+  // Décodage de la polyligne
+  const shape = routeData.trip.legs[0].shape;
+  const decodedCoords = decodePolyline(shape);
+
+  const { summary, maneuvers } = routeData.trip.legs[0];
+
+  return (
+    <div style={{ display: "flex", height: "100vh", width: "100%" }}>
+      {/* Partie Carte */}
+      <div style={{ flex: 4 }}>
+        <MapContainer
+          center={decodedCoords[0] || [45.7486, 4.8258]}
+          zoom={14}
+          style={{ height: "100%", width: "100%" }}
+        >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        />
+        <ZoomControl position="bottomleft" />
+
+        {/* Itinéraire principal */}
+        <Polyline positions={decodedCoords} color="blue" weight={5} opacity={0.7} />
+
+        {/* Points de départ et d'arrivée */}
+        <Marker position={decodedCoords[0]}>
+          <Popup>Départ: Perrache</Popup>
+        </Marker>
+        <Marker position={decodedCoords[decodedCoords.length - 1]}>
+          <Popup>Arrivée: Hôtel de Ville</Popup>
+        </Marker>
+
+        {/* Instructions d'itinéraire */}
+        {maneuvers.map((maneuver, index) => {
+          console.log(`Maneuver ${index} — begin_shape_index: ${maneuver.begin_shape_index}`);
+
+          const pos = decodedCoords[maneuver.begin_shape_index];
+          console.log(`Position:`, pos);
+          if (!pos) return null;
+          return (
+            <Marker
+              key={index}
+              position={pos}
+              icon={L.divIcon({
+                className: "custom-icon",
+                html: `<div class="custom-icon">${
+                  index + 1
+                }</div>`,
+                iconSize: [20, 20],
+              })}
+            >
+              <Popup>
+                <strong>Étape {index + 1}:</strong> {maneuver.instruction}
+                <br />
+                Distance: {(maneuver.length * 1.60934).toFixed(2)} km
+                <br />
+                Durée: {Math.round(maneuver.time / 60)} minutes
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+      </div>
+
+      {/* Panneau de contrôle à droite */}
+    <div className="sidebar">
+      <h3>Options d'itinéraire</h3>
+      <label>Mode de transport:</label>
+      <select value={transportMode} onChange={(e) => setTransportMode(e.target.value)}>
+        <option value="auto">Voiture</option>
+        <option value="bicycle">Vélo</option>
+        <option value="pedestrian">À pied</option>
+        <option value="motor_scooter">Moto</option>
+      </select>
+
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            checked={avoidTolls}
+            onChange={(e) => setAvoidTolls(e.target.checked)}
+          />
+          Éviter les péages
+        </label>
+      </div>
+
+      <button onClick={fetchRoute}>
+        Calculer l'itinéraire
+      </button>
+    </div>
+
+      {/* Affichage des informations récapitulatives */}
+      <div className="route-summary">
+        <h3>Récapitulatif</h3>
+        <p>Distance totale: {summary.length.toFixed(2)} km</p>
+        <p>Temps estimé: {Math.round(summary.time / 60)} minutes</p>
+      </div>
+    </div>
+  );
+}
