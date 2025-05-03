@@ -1,0 +1,21 @@
+.marker {
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  .marker.start {
+    background-color: #10b981; /* vert */
+  }
+  
+  .marker.end {
+    background-color: #ef4444; /* rouge */
+  }
+  
+  .map-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }

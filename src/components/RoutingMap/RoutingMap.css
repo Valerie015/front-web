@@ -1,0 +1,66 @@
+.route-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Carte prend 4/5 de l'écran */
+.map-area {
+  flex: 4;
+}
+
+/* Panneau latéral */
+.sidebar {
+  flex: 1;
+  padding: 1rem;
+  padding-top: 60px; 
+  background-color: #f4f4f4;
+  border-left: 1px solid #ccc;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+  margin-bottom: 1rem;
+}
+
+.sidebar label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.sidebar select {
+  width: 100%;
+  padding: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.sidebar input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.sidebar button {
+  padding: 0.5rem 1rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.sidebar button:hover {
+  background-color: #005fa3;
+}
+
+/* Pour le résumé sous la carte si tu le gardes */
+.route-summary {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
