@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, ChevronDown, LogOut, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const UserMenu = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -23,6 +24,18 @@ const UserMenu = ({ onLogout }) => {
     };
   }, []);
 
+  const handleProfileClick = () => {
+    const token = localStorage.getItem('token'); // ou sessionStorage
+
+    if (token) {
+      // Optionnel : vérifier la validité du token (exp, signature, etc.)
+      navigate('/account');
+    } else {
+      alert('Session expirée. Veuillez vous reconnecter.');
+      navigate('/login'); // ou déclencher un logout
+    }
+  };
+
   return (
     <div className="user-menu" ref={dropdownRef}>
       <button className="user-button" onClick={toggleDropdown}>
@@ -30,11 +43,11 @@ const UserMenu = ({ onLogout }) => {
         <span>Compte</span>
         <ChevronDown size={16} />
       </button>
-      
+
       <div className={`user-dropdown ${isOpen ? 'open' : ''}`}>
-        <div className="user-option">
+        <div className="user-option" onClick={handleProfileClick}>
           <User size={16} className="user-option-icon" />
-          <Link to="/account">Mon profil</Link>
+          <span>Mon profil</span>
         </div>
         <div className="user-option">
           <MapPin size={16} className="user-option-icon" />

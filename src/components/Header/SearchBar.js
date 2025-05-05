@@ -1,13 +1,42 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 
-const SearchBar = ({ isMobile = false }) => {
+const SearchBar = ({ isMobile = false, onLocationFound, placeholder }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    console.log('Searching for:', searchQuery);
-    // Here you would implement actual search functionality
+    if (!searchQuery.trim() || typeof onLocationFound !== 'function') return;
+
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const firstResult = data[0];
+        const location = {
+          address: firstResult.display_name,
+          lat: parseFloat(firstResult.lat),
+          lng: parseFloat(firstResult.lon)
+        };
+        
+        console.log('Location found:', location);
+        onLocationFound(location); // Appel sécurisé grâce à la vérification
+      } else {
+        console.log('No results found');
+        onLocationFound && onLocationFound(null);
+      }
+    } catch (error) {
+      console.error('Error during geocoding:', error);
+      onLocationFound && onLocationFound(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -17,10 +46,12 @@ const SearchBar = ({ isMobile = false }) => {
         <input
           type="text"
           className="search-bar"
-          placeholder="Rechercher un lieu ou un itinéraire..."
+          placeholder={placeholder || "Rechercher un lieu ou un itinéraire..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          disabled={isLoading}
         />
+        {isLoading && <span className="loading-indicator">Chargement...</span>}
       </form>
     </div>
   );
