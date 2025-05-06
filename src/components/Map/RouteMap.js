@@ -158,19 +158,7 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
           
           {showIncidentPopup && !incidentData.position && <IncidentPositionHelper />}
 
-          {/* Incident marker */}
-          {incidentData.position && (
-            <Marker 
-              position={incidentData.position}
-              icon={L.divIcon({
-                className: "incident-marker",
-                html: '<div style="color:red;font-weight:bold;font-size:16px;">!</div>',
-                iconSize: [24, 24]
-              })}
-            >
-              <Popup>Nouvel incident signalé</Popup>
-            </Marker>
-          )}
+          
 
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -202,6 +190,20 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
             units,
             displayDistance,
           })}
+
+          {/* Incident marker */}
+          {incidentData.position && (
+            <Marker 
+              position={incidentData.position}
+              icon={L.divIcon({
+                className: "incident-marker",
+                html: '<div style="color:red;font-weight:bold;font-size:25px;">!</div>',
+                iconSize: [24, 24]
+              })}
+            >
+              <Popup>Nouvel incident signalé</Popup>
+            </Marker>
+          )}
         </MapContainer>
         
       </div>

@@ -5,8 +5,8 @@ const Logo = () => {
   return (
     <div className="logo">
       <a href="/">
-        <MapPin className="logo-icon" size={24} />
-        <span>RouteGuide</span>
+        <MapPin className="logo-icon" size={30} />
+        <span>SupMap</span>
       </a>
     </div>
   );

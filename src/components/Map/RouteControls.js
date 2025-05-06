@@ -5,10 +5,6 @@ export default function RouteControls({
   setTransportMode,
   avoidTolls,
   setAvoidTolls,
-  avoidHighways,
-  setAvoidHighways,
-  avoidFerries,
-  setAvoidFerries,
   units,
   setUnits,
   language,
@@ -47,30 +43,6 @@ export default function RouteControls({
               aria-label="Éviter les péages"
             />
             Éviter les péages
-          </label>
-        </div>
-
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={avoidHighways}
-              onChange={(e) => setAvoidHighways(e.target.checked)}
-              aria-label="Éviter les autoroutes"
-            />
-            Éviter les autoroutes
-          </label>
-        </div>
-
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={avoidFerries}
-              onChange={(e) => setAvoidFerries(e.target.checked)}
-              aria-label="Éviter les ferries"
-            />
-            Éviter les ferries
           </label>
         </div>
 
