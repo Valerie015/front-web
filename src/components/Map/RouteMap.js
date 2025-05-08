@@ -3,10 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from "react-leafl
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./RoutingMap.css";
+import SearchBar from "../Header/SearchBar"
 
-import { MapClickHandler, FitBounds, IncidentPositionHelper } from "./MapHandlers";
+import { MapClickHandler, FitBounds } from "./MapHandlers";
 import { fetchRoute, displayDistance } from "./RouteService";
-import { IncidentPopup } from "./IncidentReporting";
 import RouteControls from "./RouteControls";
 import { renderRouteElements } from "./RouteElements";
 import QRCodeMap from "./QRCode";
@@ -38,26 +38,31 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // Incident reporting
-  const [showIncidentPopup, setShowIncidentPopup] = useState(false);
-  const [incidentData, setIncidentData] = useState({
-    type: "",
-    description: "",
-    expectedDuration: "",
-    position: null
-  });
   
   // Alternative routes
   const [alternateCount, setAlternateCount] = useState(1); 
   const [selectedAltIndex, setSelectedAltIndex] = useState(-1);
   const [alternateRoutes, setAlternateRoutes] = useState([]);
 
-  const handleIncidentPositionClick = (e) => {
-    const { lat, lng } = e.latlng;
-    setIncidentData(prev => ({
-      ...prev,
-      position: [lat, lng]
-    }));
+  const handleLocationFound = (location) => {
+    if (!location) return; 
+    
+    const newPoint = [location.lat, location.lng];
+    
+    if (!startPoint) {
+      setStartPoint(newPoint);
+      onPointsChange?.({ start: newPoint, end: endPoint });
+    } else if (!endPoint) {
+      setEndPoint(newPoint);
+      onPointsChange?.({ start: startPoint, end: newPoint });
+    } else {
+      setStartPoint(newPoint);
+      setEndPoint(null);
+      onPointsChange?.({ start: newPoint, end: null });
+      setDecodedCoords([]);
+      setManeuvers([]);
+      setSummary({ length: 0, time: 0 });
+    }
   };
 
   const handleMapClick = (e) => {
@@ -89,7 +94,6 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
     setManeuvers(altRoute.maneuvers);
   };
 
-  // Fetch route when needed parameters change
   useEffect(() => {
     const getRoute = async () => {
       if (!startPoint || !endPoint) return;
@@ -134,6 +138,20 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100%" }}>
+      {/* Ajoutez cette div pour la barre de recherche */}
+      <div style={{
+         position: 'fixed',
+         top: '3.5%',
+         left: '55%',
+         transform: 'translate(-50%, -50%)',
+        zIndex: 1000,
+        width: '300px',
+      }}>
+        <SearchBar 
+          onLocationFound={handleLocationFound}
+          placeholder="Rechercher un lieu..."
+        />
+      </div>
       {/* Map */}
       <div style={{ flex: 4 }}>
         <MapContainer
@@ -144,8 +162,6 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
         >
           <MapClickHandler 
             onClick={handleMapClick}
-            incidentMode={showIncidentPopup && !incidentData.position}
-            onIncidentPositionClick={handleIncidentPositionClick}
           />
           
           {startPoint && endPoint && (
@@ -155,9 +171,6 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
               alternateRoute={selectedAltIndex >= 0 ? alternateRoutes[selectedAltIndex].decoded : null}
             />
           )}
-          
-          {showIncidentPopup && !incidentData.position && <IncidentPositionHelper />}
-
           
 
           <TileLayer
@@ -191,19 +204,6 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
             displayDistance,
           })}
 
-          {/* Incident marker */}
-          {incidentData.position && (
-            <Marker 
-              position={incidentData.position}
-              icon={L.divIcon({
-                className: "incident-marker",
-                html: '<div style="color:red;font-weight:bold;font-size:25px;">!</div>',
-                iconSize: [24, 24]
-              })}
-            >
-              <Popup>Nouvel incident signalé</Popup>
-            </Marker>
-          )}
         </MapContainer>
         
       </div>
@@ -222,23 +222,11 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
         setAlternateCount={setAlternateCount}
         loading={loading}
         error={error}
-        setShowIncidentPopup={setShowIncidentPopup}
-        setIncidentData={setIncidentData}
         decodedCoords={decodedCoords}
         summary={summary}
         displayDistance={displayDistance}
         setShowQRCode={setShowQRCode}
       />
-      
-
-      {/* Incident popup */}
-      {showIncidentPopup && (
-        <IncidentPopup 
-          incidentData={incidentData}
-          setIncidentData={setIncidentData}
-          setShowIncidentPopup={setShowIncidentPopup}
-        />
-      )}
       
       {/* QRCode popup */}
       {showQRCode && decodedCoords && decodedCoords.length >= 2 && (

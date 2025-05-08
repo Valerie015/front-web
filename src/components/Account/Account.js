@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { processRouteData } from '../../utils/routeUtils';
+import TransportPieChart from './TransportPieChart';
 import './Account.css';
 
 const Account = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ userName: '', email: '' });
+  const [formData, setFormData] = useState({ userName: '', email: '', password: '', confirmPassword: '' });
   const [successMessage, setSuccessMessage] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const navigate = useNavigate();
+  const [totalDistance, setTotalDistance] = useState(0);
+  const [transportCounts, setTransportCounts] = useState({});
 
 
   const token = localStorage.getItem("token");
@@ -17,31 +22,78 @@ const Account = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!token) {
-        setError("Token manquant.");
-        return;
-      }
+            navigate("/auth");
+            return;
+          }
+      
+          let decoded;
+          try {
+            decoded = jwtDecode(token);
+          } catch (err) {
+            navigate("/auth");
+            return;
+          }
+      
+          const userId = decoded.userId;
+          if (!userId) {
+            navigate("/auth");
+            return;
+          }
+      
 
       try {
-        const decoded = jwtDecode(token);
-        const userId = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
-        const response = await axios.get(`http://localhost/api/user/${userId}`, {
+        const response = await fetch(`http://localhost/api/user/me`, {
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        setProfile(response.data);
+        if (!response.ok) {
+          throw new Error("Erreur lors de la récupération du profil");
+        }
+
+        const data = await response.json();
+        setProfile(data);
         setFormData({
-          userName: response.data.userName,
-          email: response.data.email
+          userName: data.userName,
+          email: data.email,
         });
       } catch (e) {
-        setError("Erreur lors du décodage ou de la récupération du profil.");
+        console.error("Erreur complète :", e);
+        setError("Erreur lors de la récupération du profil.");
       }
     };
 
     fetchProfile();
   }, [token]);
+
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      if (!profile) return;
+  
+      try {
+        const response = await fetch(`/api/route/user/${profile.id}/recent?limit=100`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!response.ok) throw new Error("Erreur lors du chargement des itinéraires");
+  
+        const data = await response.json();
+        const { totalDistance, transportCounts } = processRouteData(data);
+  
+        setTotalDistance(totalDistance);
+        setTransportCounts(transportCounts);
+  
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  
+    fetchRoutes();
+  }, [profile]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -49,42 +101,67 @@ const Account = () => {
   };
 
   const handleUpdate = async () => {
+    if (!formData.userName || !formData.email) {
+      setError("Nom d'utilisateur et email sont obligatoires.");
+      return;
+    }
     if (!profile) return;
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+
 
     try {
-      await axios.put(`http://localhost/api/user/${profile.id}`, formData, {
+      const response = await fetch(`http://localhost/api/user/update/me`, {
+        method: "PUT",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify(formData),
       });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la mise à jour.");
+      }
+
+      setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
 
       setSuccessMessage("Profil mis à jour avec succès.");
       setProfile((prev) => ({ ...prev, ...formData }));
       setShowModal(false);
     } catch (err) {
+      console.error(err);
       setError("Erreur lors de la mise à jour du profil.");
     }
   };
 
   const handleDeleteAccount = async () => {
     if (!profile) return;
-  
+
     try {
-      await axios.delete(`http://localhost/api/user/delete/${profile.id}`, {
+      const response = await fetch(`http://localhost/api/user//delete/me`, {
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
-      localStorage.removeItem("token"); // déconnecte l'utilisateur
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la suppression du compte.");
+      }
+
+      localStorage.removeItem("token");
       alert("Compte supprimé avec succès.");
-      window.location.href = "/"; // ou redirige vers page de login
+      window.location.href = "/";
     } catch (err) {
+      console.error(err);
       setError("Erreur lors de la suppression du compte.");
       setShowDeleteConfirm(false);
     }
   };
-  
+
   if (error) return <div className="error">{error}</div>;
   if (!profile) return <div>Chargement du profil...</div>;
 
@@ -95,19 +172,25 @@ const Account = () => {
         <li><strong>Nom d'utilisateur :</strong> {profile.userName}</li>
         <li><strong>Email :</strong> {profile.email}</li>
       </ul>
-
-      <button onClick={() => setShowModal(true)}>Modifier</button>
-      <button onClick={() => setShowDeleteConfirm(true)} style={{ backgroundColor: '#e74c3c', marginTop: '20px' }}>
-      Supprimer mon compte
-      </button>
-
+      <div className="travel-stats">
+        <h3>Statistiques de déplacement</h3>
+        <p><strong>Distance totale parcourue :</strong> {totalDistance.toFixed(2)} km</p>
+        <TransportPieChart transportCounts={transportCounts} />
+      </div>
+      <div className="button-group">
+        <button onClick={() => setShowModal(true)}>Modifier</button>
+        <button onClick={() => setShowDeleteConfirm(true)} className="delete-button">
+          Supprimer mon compte
+        </button>
+      </div>
 
       {successMessage && <p className="success">{successMessage}</p>}
 
       {showModal && (
         <div className="modal">
-          <div className="modal-content">
-            <h3>Modifier le profil</h3>
+        <div className="modal-content">
+          <h3>Modifier le profil</h3>
+          <div className="form-group">
             <label>Nom d'utilisateur :</label>
             <input
               type="text"
@@ -115,6 +198,8 @@ const Account = () => {
               value={formData.userName}
               onChange={handleInputChange}
             />
+          </div>
+          <div className="form-group">
             <label>Email :</label>
             <input
               type="email"
@@ -122,13 +207,42 @@ const Account = () => {
               value={formData.email}
               onChange={handleInputChange}
             />
-            <div className="modal-actions">
-              <button onClick={handleUpdate}>Enregistrer</button>
-              <button onClick={() => setShowModal(false)}>Annuler</button>
-            </div>
+          </div>
+          <div className="form-group">
+            <label>Mot de passe (laisser vide si inchangé) :</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Confirmer le mot de passe :</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+            />
+          </div>
+      
+          {formData.password && formData.confirmPassword && (
+            <p style={{ color: formData.password === formData.confirmPassword ? 'green' : 'red' }}>
+              {formData.password === formData.confirmPassword
+                ? '✔ Les mots de passe correspondent.'
+                : '❌ Les mots de passe ne correspondent pas.'}
+            </p>
+          )}
+      
+          <div className="modal-actions">
+            <button onClick={handleUpdate}>Enregistrer</button>
+            <button onClick={() => setShowModal(false)}>Annuler</button>
           </div>
         </div>
+      </div>      
       )}
+
       {showDeleteConfirm && (
         <div className="modal">
           <div className="modal-content">
@@ -142,6 +256,7 @@ const Account = () => {
         </div>
       )}
     </div>
+    
   );
 };
 

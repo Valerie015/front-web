@@ -181,7 +181,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #4B5563;
+  color: #646669;
   font-size: 0.9rem;
   font-weight: 500;
   transition: color 0.2s;
@@ -189,6 +189,7 @@
 
 .user-button:hover {
   color: #3B82F6;
+  background-color: transparent;
 }
 
 .user-dropdown {
@@ -228,4 +229,19 @@
 
 .user-option-icon {
   color: #6B7280;
+}
+
+.search-wrapper {
+  width: 300px;
+  position: relative;
+  transition: opacity 0.3s ease; 
+}
+
+.search-wrapper.invisible {
+  opacity: 0;
+  pointer-events: none; 
+}
+
+.auth-buttons {
+  transition: margin-left 0.3s ease; 
 }

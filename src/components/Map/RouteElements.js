@@ -1,5 +1,5 @@
 import React from "react";
-import { Polyline, Marker, Popup } from "react-leaflet";
+import { Polyline, Marker, Popup, Tooltip } from "react-leaflet";
 import L from "leaflet";
 
 // Function to render all route-related elements
@@ -75,6 +75,14 @@ function renderManeuverMarkers(maneuvers, decodedCoords, units, displayDistance,
           mouseout: onManeuverOut,
         }}
       >
+        <Tooltip direction="top" offset={[0, -10]} opacity={0.9} sticky>
+          <div>
+            <strong>Étape {index + 1}:</strong><br />
+            {maneuver.instruction}<br />
+            Distance: {displayDistance(maneuver.length, units)}<br />
+            Durée: {Math.round(maneuver.time / 60)} min
+          </div>
+        </Tooltip>
         <Popup>
           <strong>Étape {index + 1}:</strong> {maneuver.instruction}
           <br />

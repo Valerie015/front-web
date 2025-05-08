@@ -1,6 +1,15 @@
 import { decodePolyline } from "../../utils/decodePolyline";
 
-// Function to fetch a route
+
+const validateCoordinates = (coordinates) => {
+  return (
+    Array.isArray(coordinates) &&
+    coordinates.length === 2 &&
+    !isNaN(coordinates[0]) &&
+    !isNaN(coordinates[1])
+  );
+};
+
 export async function fetchRoute({
   startPoint,
   endPoint,
@@ -10,7 +19,13 @@ export async function fetchRoute({
   language,
   alternateCount
 }) {
+  if (!validateCoordinates(startPoint) || !validateCoordinates(endPoint)) {
+    throw new Error("Les coordonnées de départ ou d'arrivée sont invalides.");
+  }
+
   const url = "api/navigation/route";
+
+  
   const body = {
     locations: [
       { lat: startPoint[0], lon: startPoint[1] },
@@ -29,44 +44,47 @@ export async function fetchRoute({
     alternates: alternateCount,
   };
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) throw new Error("Erreur réseau");
-  const data = await response.json();
-
-  // Process main route
-  const mainShape = data.trip.legs[0].shape;
-  const mainDecoded = decodePolyline(mainShape);
-  const maneuvers = data.trip.legs[0].maneuvers;
-  const summary = data.trip.summary;
-
-  // Process alternate routes
-  const alternates = [];
-  if (data.alternates && data.alternates.length > 0) {
-    data.alternates.forEach(alt => {
-      alternates.push({
-        shape: alt.trip.legs[0].shape,
-        decoded: decodePolyline(alt.trip.legs[0].shape),
-        summary: alt.trip.summary,
-        maneuvers: alt.trip.legs[0].maneuvers,
-      });
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
-  }
 
-  return {
-    data,
-    mainDecoded,
-    maneuvers,
-    summary,
-    alternates
-  };
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Erreur réseau");
+    }
+
+    const data = await response.json();
+
+    
+    const mainShape = data.trip.legs[0].shape;
+    const mainDecoded = decodePolyline(mainShape);
+    const maneuvers = data.trip.legs[0].maneuvers;
+    const summary = data.trip.summary;
+
+    
+    const alternates = data.alternates?.map(alt => ({
+      shape: alt.trip.legs[0].shape,
+      decoded: decodePolyline(alt.trip.legs[0].shape),
+      summary: alt.trip.summary,
+      maneuvers: alt.trip.legs[0].maneuvers,
+    })) || [];
+
+    return {
+      data,
+      mainDecoded,
+      maneuvers,
+      summary,
+      alternates
+    };
+  } catch (err) {
+    throw new Error(`Erreur lors de la récupération des données : ${err.message}`);
+  }
 }
 
-// Helper to display distance based on units
+
 export function displayDistance(len, units) {
   return units === "miles"
     ? `${len.toFixed(2)} mi`

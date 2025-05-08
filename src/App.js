@@ -8,6 +8,7 @@ import Register from './components/Auth/Register/Register.js';
 import Auth from './components/Auth/Auth.js';
 import Header from './components/Header/Header.js';
 import Account from './components/Account/Account.js';
+import RouteHistory from'./components/Map/RouteHistory.js';
 
 import './App.css';
 
@@ -23,6 +24,7 @@ function AppLayout() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/historiques" element={<RouteHistory />} />
       </Routes>
     </>
   );

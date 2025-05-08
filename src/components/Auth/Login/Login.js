@@ -12,34 +12,42 @@ function Login() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/");
+      navigate("/");  // Rediriger vers la page d'accueil si déjà connecté
     }
   }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
+    setError("");  // Réinitialiser l'erreur
+    setLoading(true);  // Mettre l'état de chargement à true
+  
     try {
       const response = await fetch("http://localhost/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
+  
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(text);
+        throw new Error(text);  // Si la réponse n'est pas ok, gérer l'erreur
       }
-
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      navigate("/");
+  
+      const data = await response.json();  // Analyser la réponse JSON
+      console.log(data);  // Afficher la réponse pour le débogage
+  
+      // Vérifier si la réponse contient un token
+      if (data.token) {
+        localStorage.setItem("token", data.token);  // Stocker le token
+  
+        navigate("/");  // Rediriger vers la page d'accueil après la connexion
+      } else {
+        setError("Données de connexion invalides.");
+      }
     } catch (err) {
-      setError(err.message || "Une erreur s'est produite");
+      setError(err.message || "Une erreur s'est produite lors de la connexion.");
     } finally {
-      setLoading(false);
+      setLoading(false);  // Réinitialiser l'état de chargement
     }
   };
 

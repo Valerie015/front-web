@@ -28,12 +28,15 @@ const UserMenu = ({ onLogout }) => {
     const token = localStorage.getItem('token'); // ou sessionStorage
 
     if (token) {
-      // Optionnel : vérifier la validité du token (exp, signature, etc.)
       navigate('/account');
     } else {
       alert('Session expirée. Veuillez vous reconnecter.');
-      navigate('/login'); // ou déclencher un logout
+      navigate('/login');
     }
+  };
+
+  const handleHistoriqueClick = () => {
+    navigate('/historiques');
   };
 
   return (
@@ -49,9 +52,9 @@ const UserMenu = ({ onLogout }) => {
           <User size={16} className="user-option-icon" />
           <span>Mon profil</span>
         </div>
-        <div className="user-option">
+        <div className="user-option" onClick={handleHistoriqueClick}>
           <MapPin size={16} className="user-option-icon" />
-          <span>Mes itinéraires</span>
+          <span>Mes historiques</span>
         </div>
         <div className="user-option" onClick={onLogout}>
           <LogOut size={16} className="user-option-icon" />

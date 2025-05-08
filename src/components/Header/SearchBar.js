@@ -11,10 +11,12 @@ const SearchBar = ({ isMobile = false, onLocationFound, placeholder }) => {
 
     setIsLoading(true);
     
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
-      );
+    const auvergneRhoneAlpesBoundingBox = "4.0,46.8,8.5,44.0"; 
+
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&bounded=1&viewbox=${auvergneRhoneAlpesBoundingBox}`
+    );
       const data = await response.json();
       
       if (data && data.length > 0) {
@@ -26,7 +28,7 @@ const SearchBar = ({ isMobile = false, onLocationFound, placeholder }) => {
         };
         
         console.log('Location found:', location);
-        onLocationFound(location); // Appel sécurisé grâce à la vérification
+        onLocationFound(location);
       } else {
         console.log('No results found');
         onLocationFound && onLocationFound(null);
@@ -46,7 +48,7 @@ const SearchBar = ({ isMobile = false, onLocationFound, placeholder }) => {
         <input
           type="text"
           className="search-bar"
-          placeholder={placeholder || "Rechercher un lieu ou un itinéraire..."}
+          placeholder={placeholder || "Rechercher un lieu ..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           disabled={isLoading}
