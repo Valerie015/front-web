@@ -171,6 +171,7 @@
 /* User Menu */
 .user-menu {
   position: relative;
+  margin-right: 5%; 
 }
 
 .user-button {
@@ -244,4 +245,83 @@
 
 .auth-buttons {
   transition: margin-left 0.3s ease; 
+}
+
+@media (max-width: 1265px) {
+  .header-right {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .search-wrapper {
+    display: none;
+  }
+
+  .auth-buttons {
+    margin-left: 0;
+  }
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  cursor: pointer;
+  color: #4B5563;
+  margin-left: 82%; 
+}
+
+.menu-toggle:hover{
+  background-color: #F9FAFB;
+  color: #EF4444;
+}
+
+@media (max-width: 1265px) {
+  .main-nav,
+  .search-wrapper,
+  .user-menu,
+  .auth-buttons {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: block;
+    position: relative;
+    z-index: 1001;
+  }
+
+  .mobile-nav {
+    position: absolute;
+    top: 70px;
+    right: 1.5rem;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    z-index: 999;
+    text-align: right;
+  }
+
+  .mobile-nav a,
+  .mobile-nav span {
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: #4B5563;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .mobile-nav a:hover,
+  .mobile-nav span:hover {
+    background-color: #F3F4F6;
+    color: #EF4444;
+  }
+    .header-left {
+    margin-left: 0.5rem; /* ou plus selon ton besoin */
+  }
 }

@@ -10,6 +10,8 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const token = localStorage.getItem("token");
+  const [menuOpen, setMenuOpen] = useState(false);
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,7 +39,7 @@ const Header = () => {
                 <Link to="/">Itinéraires</Link>
               </li>
               <li className={`nav-item ${location.pathname === '/historiques' ? 'active' : ''}`}>
-                <Link to="/historiques">Historiques de vos routes</Link>
+                <Link to="/historiques">Historique de vos routes</Link>
               </li>
               <li className={`nav-item ${location.pathname === '/statistiques' ? 'active' : ''}`}>
                 <Link to="/statistiques">Statistiques</Link>
@@ -46,7 +48,34 @@ const Header = () => {
           </nav>
         </div>
 
+
         <div className="header-right">
+          {/* Bouton menu toggle ici */}
+            <button
+              className="menu-toggle"
+              onClick={() => setMenuOpen(prev => !prev)}
+              aria-label="Toggle navigation menu"
+            >
+              ☰
+            </button>
+          {menuOpen && (
+            <div className="mobile-nav">
+              <Link to="/" onClick={() => setMenuOpen(false)}>Itinéraires</Link>
+              <Link to="/historiques" onClick={() => setMenuOpen(false)}>Historique de vos routes</Link>
+              <Link to="/statistiques" onClick={() => setMenuOpen(false)}>Statistiques</Link>
+              {!token ? (
+                <>
+                  <Link to="/login" onClick={() => setMenuOpen(false)}>Connexion</Link>
+                  <Link to="/register" onClick={() => setMenuOpen(false)}>Inscription</Link>
+                </>
+              ) : (
+                <>
+                <Link to="/account" onClick={() => setMenuOpen(false)}>Mon profil</Link>
+                <span onClick={() => { handleLogout(); setMenuOpen(false); }}>Déconnexion</span>
+                </>
+              )}
+            </div>
+          )}
           <div className={`search-wrapper ${location.pathname !== '/test' ? 'invisible' : ''}`}>
             <SearchBar />
           </div>
