@@ -17,28 +17,45 @@ export function haversineDistance(lat1, lon1, lat2, lon2) {
   }
   
   export function processRouteData(routes) {
-    let total = 0;
-    const counts = {};
-  
-    const processedRoutes = routes.map((route) => {
-      const distance = haversineDistance(
-        route.startLatitude,
-        route.startLongitude,
-        route.endLatitude,
-        route.endLongitude
-      );
-      total += distance;
-  
-      const mode = route.transportMode?.toLowerCase();
-      counts[mode] = (counts[mode] || 0) + 1;
-  
-      return { ...route, distance };
-    });
-  
-    return {
-      routesWithDistance: processedRoutes,
-      totalDistance: total,
-      transportCounts: counts,
+  let total = 0;
+  const counts = {};
+  const distancePerMode = {};
+  const transportTranslation = {
+      auto: "Voiture",
+      bicycle: "Vélo",
+      pedestrian: "À pied",
+      motor_scooter: "Moto",
     };
-  }
+
+  const processedRoutes = routes.map((route) => {
+    const distance = haversineDistance(
+      route.startLatitude,
+      route.startLongitude,
+      route.endLatitude,
+      route.endLongitude
+    );
+    total += distance;
+
+    const mode = route.transportMode?.toLowerCase() || 'inconnu';
+    counts[mode] = (counts[mode] || 0) + 1;
+    distancePerMode[mode] = (distancePerMode[mode] || 0) + distance;
+
+    return { ...route, distance };
+  });
+  // Traduction des modes dans distancePerMode
+    const translatedDistancePerMode = Object.entries(distancePerMode).reduce((acc, [mode, distance]) => {
+        const translatedMode = transportTranslation[mode] || mode; // Traduction ou garde le nom d'origine
+        acc[translatedMode] = distance;
+        return acc;
+    }, {});
+
+  return {
+    routesWithDistance: processedRoutes,
+    totalDistance: total,
+    transportCounts: counts,
+    distancePerMode: translatedDistancePerMode,
+  };
+}
+
+  
   

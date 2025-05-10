@@ -79,7 +79,14 @@ export default function RouteHistory() {
   
         const formatAddress = (addressData) => {
           const address = addressData.address;
-          return `${address.house_number || ''} ${address.road || ''}, ${address.suburb || ''}, ${address.city || ''}, ${address.postcode || ''}, ${address.country || ''}`.trim();
+          return [
+          address.house_number,
+          address.road,
+          address.suburb,
+          address.city,
+          address.postcode,
+          address.country
+        ].filter(Boolean).join(', ');
         };
   
         const startAddress = formatAddress(startAddressResponse.data);
@@ -138,7 +145,7 @@ export default function RouteHistory() {
                 ) : (
                   mode.label
                 )}{" "}
-                | <strong>Péages évités :</strong> {route.avoidTolls ? "Oui" : "Non"} <br />
+                <strong>Péages évités :</strong> {route.avoidTolls ? "Oui" : "Non"} <br />
                 <small>{new Date(route.createdAt).toLocaleString()}</small>
               </li>
             );

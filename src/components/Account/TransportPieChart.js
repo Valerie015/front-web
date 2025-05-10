@@ -4,9 +4,18 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA46BE', '#FF6666'];
 
+// Dictionnaire de traduction
+const TRANSLATIONS = {
+  auto: 'Voiture',
+  bicycle: 'Vélo',
+  motorcycle: 'Moto',
+  pedestrian: 'Piéton',
+  motor_scooter: 'Scooter',
+};
+
 const TransportPieChart = ({ transportCounts }) => {
   const data = Object.entries(transportCounts).map(([mode, count]) => ({
-    name: mode.charAt(0).toUpperCase() + mode.slice(1),
+    name: TRANSLATIONS[mode.toLowerCase()] || mode,
     value: count,
   }));
 

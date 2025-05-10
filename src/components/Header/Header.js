@@ -39,8 +39,8 @@ const Header = () => {
               <li className={`nav-item ${location.pathname === '/historiques' ? 'active' : ''}`}>
                 <Link to="/historiques">Historiques de vos routes</Link>
               </li>
-              <li className={`nav-item ${location.pathname === '/about' ? 'active' : ''}`}>
-                <Link to="/about">À propos</Link>
+              <li className={`nav-item ${location.pathname === '/statistiques' ? 'active' : ''}`}>
+                <Link to="/statistiques">Statistiques</Link>
               </li>
             </ul>
           </nav>

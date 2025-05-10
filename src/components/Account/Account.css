@@ -1,14 +1,29 @@
 /* Account.css */
 
 .account-container {
-  margin-top: 34px;
   max-width: 600px;
   margin: 40px auto;
+  margin-top: 80px;
   padding: 20px;
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   font-family: 'Segoe UI', sans-serif;
+}
+.account-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../Styles/compte.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  opacity: 0.05; 
+  z-index: -1; 
 }
 
 .account-container h2 {
@@ -209,11 +224,13 @@ button:hover {
 .travel-stats {
   margin-top: 2rem;
   padding: 1rem;
+  margin-bottom: 60px;
   border-top: 1px solid #ccc;
 }
 
 .travel-stats h3 {
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .travel-stats ul {

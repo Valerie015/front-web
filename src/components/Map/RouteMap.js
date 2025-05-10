@@ -11,7 +11,6 @@ import RouteControls from "./RouteControls";
 import { renderRouteElements } from "./RouteElements";
 import QRCodeMap from "./QRCode";
 
-// Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -278,7 +277,6 @@ export default function RouteMap({ externalStartPoint, externalEndPoint, onPoint
           </button>
         </div>
       )}
-
     </div>
   );
 }

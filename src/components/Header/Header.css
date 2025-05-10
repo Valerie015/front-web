@@ -55,14 +55,14 @@
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: #3B82F6;
+  color: #EF4444;
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: -0.01em;
 }
 
 .logo-icon {
-  color: #3B82F6;
+  color: #EF4444;
 }
 
 /* Navigation */
@@ -85,11 +85,11 @@
 }
 
 .nav-item a:hover {
-  color: #3B82F6;
+  color: #EF4444;
 }
 
 .nav-item.active a {
-  color: #3B82F6;
+  color: #EF4444;
   font-weight: 600;
 }
 
@@ -100,7 +100,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #3B82F6;
+  background-color: #EF4444;
   border-radius: 1px;
 }
 
@@ -121,17 +121,17 @@
 }
 
 .auth-link:hover {
-  color: #3B82F6;
+  color: #EF4444;
   background-color: #F3F4F6;
 }
 
 .auth-link:last-child {
-  background-color: #3B82F6;
+  background-color: #EF4444;
   color: white;
 }
 
 .auth-link:last-child:hover {
-  background-color: #2563EB;
+  background-color: #EF4444;
   color: white;
 }
 
@@ -154,9 +154,9 @@
 
 .search-bar:focus {
   outline: none;
-  border-color: #3B82F6;
+  border-color: #EF4444;
   background-color: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
 }
 
 .search-icon {
@@ -188,7 +188,7 @@
 }
 
 .user-button:hover {
-  color: #3B82F6;
+  color: #EF4444;
   background-color: transparent;
 }
 
