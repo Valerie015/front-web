@@ -4,6 +4,13 @@ Ce dépôt contient l’interface utilisateur de SupMap, une application de navi
 
 ## 🖥️ Démarrage du projet
 
+1. Cloner ce dépot :
+
+```bash
+git clone https://github.com/Valerie015/front-web.git
+cd front-web
+```
+
 Dans le répertoire du projet, exécutez les commandes suivantes :
 
 ### Installation des dépendances
